@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0B7A92E32E829A6900CA52E1 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92E22E829A6900CA52E1 /* Alamofire */; };
+		0B7A92E62E829C2100CA52E1 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92E52E829C2100CA52E1 /* RxCocoa */; };
+		0B7A92E82E829C2100CA52E1 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92E72E829C2100CA52E1 /* RxSwift */; };
+		0B7A92FE2E830E7F00CA52E1 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92FD2E830E7F00CA52E1 /* RxRelay */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		0B7A92422E82958800CA52E1 /* myCrypto.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = myCrypto.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +30,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B7A92E82E829C2100CA52E1 /* RxSwift in Frameworks */,
+				0B7A92E62E829C2100CA52E1 /* RxCocoa in Frameworks */,
+				0B7A92FE2E830E7F00CA52E1 /* RxRelay in Frameworks */,
+				0B7A92E32E829A6900CA52E1 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +44,7 @@
 			isa = PBXGroup;
 			children = (
 				0B7A92442E82958800CA52E1 /* myCrypto */,
+				0B7A92FC2E830E7F00CA52E1 /* Frameworks */,
 				0B7A92432E82958800CA52E1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +55,13 @@
 				0B7A92422E82958800CA52E1 /* myCrypto.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		0B7A92FC2E830E7F00CA52E1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +84,10 @@
 			);
 			name = myCrypto;
 			packageProductDependencies = (
+				0B7A92E22E829A6900CA52E1 /* Alamofire */,
+				0B7A92E52E829C2100CA52E1 /* RxCocoa */,
+				0B7A92E72E829C2100CA52E1 /* RxSwift */,
+				0B7A92FD2E830E7F00CA52E1 /* RxRelay */,
 			);
 			productName = myCrypto;
 			productReference = 0B7A92422E82958800CA52E1 /* myCrypto.app */;
@@ -94,6 +117,10 @@
 			);
 			mainGroup = 0B7A92392E82958800CA52E1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0B7A92E12E829A6900CA52E1 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0B7A92432E82958800CA52E1 /* Products */;
 			projectDirPath = "";
@@ -244,7 +271,7 @@
 		0B7A92532E82958900CA52E1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = myCryptoIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -254,6 +281,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -264,10 +292,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.yelinaung.myCrypto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -281,14 +309,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 1.3;
 			};
 			name = Debug;
 		};
 		0B7A92542E82958900CA52E1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = myCryptoIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -298,6 +326,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -308,10 +337,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.yelinaung.myCrypto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -325,7 +354,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 1.3;
 			};
 			name = Release;
 		};
@@ -351,6 +380,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0B7A92E12E829A6900CA52E1 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
+		0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0B7A92E22E829A6900CA52E1 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0B7A92E12E829A6900CA52E1 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		0B7A92E52E829C2100CA52E1 /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		0B7A92E72E829C2100CA52E1 /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
+		};
+		0B7A92FD2E830E7F00CA52E1 /* RxRelay */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxRelay;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0B7A923A2E82958800CA52E1 /* Project object */;
 }
