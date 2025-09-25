@@ -29,7 +29,6 @@ enum TabDestination: Hashable {
 
 enum PushDestination: Hashable {
     case details
-    case notifications
 }
 
 enum SheetDestination: Hashable, Identifiable {
@@ -40,8 +39,8 @@ enum SheetDestination: Hashable, Identifiable {
 }
 
 enum FullScreenDestination: Hashable, Identifiable {
-    case fullScreen1
-    case fullScreen2
+    case profile
+    case notification
     
     var id: UUID { UUID() }
 }

@@ -9,10 +9,23 @@ import SwiftUI
 
 struct MarketView: View {
     var body: some View {
-        Text("Market View")
+        VStack(alignment: .leading, spacing: 8) {
+            TitleLabel("Market")
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding()
     }
 }
 
 #Preview {
-    MarketView()
+    NavigationContainer(parentRouter: .previewRouter()) {
+        MarketView()
+    }
+}
+
+#Preview {
+    NavigationContainer(parentRouter: .previewRouter()) {
+        MainView()
+    }
 }

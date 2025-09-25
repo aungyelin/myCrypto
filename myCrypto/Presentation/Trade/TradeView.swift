@@ -9,10 +9,23 @@ import SwiftUI
 
 struct TradeView: View {
     var body: some View {
-        Text("TradeView")
+        VStack(alignment: .leading, spacing: 8) {
+            TitleLabel("Trade")
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding()
     }
 }
 
 #Preview {
-    TradeView()
+    NavigationContainer(parentRouter: .previewRouter()) {
+        TradeView()
+    }
+}
+
+#Preview {
+    NavigationContainer(parentRouter: .previewRouter()) {
+        MainView()
+    }
 }

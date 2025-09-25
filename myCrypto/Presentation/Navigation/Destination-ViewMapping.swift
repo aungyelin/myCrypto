@@ -17,7 +17,6 @@ import SwiftUI
 @ViewBuilder func view(for destination: PushDestination) -> some View {
     switch destination {
     case .details: DetailsView()
-    case .notifications: NotificationsView()
     }
 }
 
@@ -30,15 +29,13 @@ import SwiftUI
     }
     .navigationBarTitleDisplayMode(.inline)
     .presentationDetents([.medium, .large])
-    .presentationBackground(.regularMaterial)
 }
 
 @ViewBuilder func view(for destination: FullScreenDestination) -> some View {
     Group {
         switch destination {
-        case .fullScreen1: EmptyView()
-        case .fullScreen2: EmptyView()
+        case .profile: ProfileView()
+        case .notification: NotificationsView()
         }
     }
-    .presentationBackground(.black)
 }

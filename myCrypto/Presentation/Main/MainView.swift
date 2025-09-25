@@ -29,7 +29,7 @@ struct MainView: View {
             NavigationContainer(parentRouter: router, tab: .market) {
                 MarketView()
             }
-            .tabItem { Label("Market", systemImage: "chart.bar") }
+            .tabItem { Label("Market", systemImage: "chart.pie.fill") }
             .tag(TabDestination.market)
             
             NavigationContainer(parentRouter: router, tab: .settings) {

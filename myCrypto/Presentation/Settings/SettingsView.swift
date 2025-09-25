@@ -9,10 +9,23 @@ import SwiftUI
 
 struct SettingsView: View {
     var body: some View {
-        Text("SettingsView")
+        VStack(alignment: .leading, spacing: 8) {
+            TitleLabel("Settings")
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding()
     }
 }
 
 #Preview {
-    SettingsView()
+    NavigationContainer(parentRouter: .previewRouter()) {
+        SettingsView()
+    }
+}
+
+#Preview {
+    NavigationContainer(parentRouter: .previewRouter()) {
+        MainView()
+    }
 }
