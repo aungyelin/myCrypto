@@ -14,7 +14,7 @@ struct TradeView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding()
+        .padding(.horizontal, 20)
     }
 }
 

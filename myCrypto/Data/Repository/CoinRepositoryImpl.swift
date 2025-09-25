@@ -1,0 +1,28 @@
+//
+//  CoinRepositoryImpl.swift
+//  myCrypto
+//
+//  Created by Ye Lin Aung on 25/9/2568 BE.
+//
+
+import Foundation
+import RxSwift
+import FactoryKit
+
+final class CoinRepositoryImpl: CoinRepository {
+    
+    @Injected(\.apiService) private var apiService
+    
+    func getAllCurrencies() -> Single<[Currency]> {
+        return apiService.getAllCurrencies()
+            .map { $0.map { dto in dto.toDomain() } }
+            .catch { error in
+                if let networkError = error as? NetworkError {
+                    return Single.error(networkError.toDomain())
+                } else {
+                    return Single.error(error)
+                }
+            }
+    }
+    
+}

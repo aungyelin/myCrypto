@@ -11,6 +11,7 @@
 		0B7A92E62E829C2100CA52E1 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92E52E829C2100CA52E1 /* RxCocoa */; };
 		0B7A92E82E829C2100CA52E1 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92E72E829C2100CA52E1 /* RxSwift */; };
 		0B7A92FE2E830E7F00CA52E1 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 0B7A92FD2E830E7F00CA52E1 /* RxRelay */; };
+		0BFF98D22E8585BC00FEBE7C /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0BFF98D12E8585BC00FEBE7C /* FactoryKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 			files = (
 				0B7A92E82E829C2100CA52E1 /* RxSwift in Frameworks */,
 				0B7A92E62E829C2100CA52E1 /* RxCocoa in Frameworks */,
+				0BFF98D22E8585BC00FEBE7C /* FactoryKit in Frameworks */,
 				0B7A92FE2E830E7F00CA52E1 /* RxRelay in Frameworks */,
 				0B7A92E32E829A6900CA52E1 /* Alamofire in Frameworks */,
 			);
@@ -88,6 +90,7 @@
 				0B7A92E52E829C2100CA52E1 /* RxCocoa */,
 				0B7A92E72E829C2100CA52E1 /* RxSwift */,
 				0B7A92FD2E830E7F00CA52E1 /* RxRelay */,
+				0BFF98D12E8585BC00FEBE7C /* FactoryKit */,
 			);
 			productName = myCrypto;
 			productReference = 0B7A92422E82958800CA52E1 /* myCrypto.app */;
@@ -120,6 +123,7 @@
 			packageReferences = (
 				0B7A92E12E829A6900CA52E1 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				0BFF98CC2E85852E00FEBE7C /* XCRemoteSwiftPackageReference "Factory" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0B7A92432E82958800CA52E1 /* Products */;
@@ -398,6 +402,14 @@
 				minimumVersion = 6.9.0;
 			};
 		};
+		0BFF98CC2E85852E00FEBE7C /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -420,6 +432,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0B7A92E42E829C2100CA52E1 /* XCRemoteSwiftPackageReference "RxSwift" */;
 			productName = RxRelay;
+		};
+		0BFF98D12E8585BC00FEBE7C /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BFF98CC2E85852E00FEBE7C /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
