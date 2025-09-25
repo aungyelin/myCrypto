@@ -14,7 +14,7 @@ struct myCryptoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            WelcomeView()
+            RootContainer()
         }
     }
 }
