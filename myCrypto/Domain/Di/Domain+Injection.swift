@@ -34,4 +34,12 @@ extension Container {
         Factory(self) { @MainActor in RemoveFavoriteUseCaseImpl() }
     }
     
+    var getOnboardingStatusUseCase: Factory<GetOnboardingStatusUseCase> {
+        Factory(self) { @MainActor in GetOnboardingStatusUseCaseImpl() }
+    }
+    
+    var setOnboardingCompletedUseCase: Factory<SetOnboardingCompletedUseCase> {
+        Factory(self) { @MainActor in SetOnboardingCompletedUseCaseImpl() }
+    }
+    
 }

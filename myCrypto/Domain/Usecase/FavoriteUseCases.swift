@@ -14,13 +14,11 @@ protocol IsFavoriteUseCase {
 }
 
 final class IsFavoriteUseCaseImpl: IsFavoriteUseCase {
-    
     @Injected(\.favoritesRepository) private var favoritesRepository
     
     func execute(id: String) -> Single<Bool> {
         favoritesRepository.isFavorite(id: id)
     }
-    
 }
 
 protocol SaveFavoriteUseCase {
@@ -28,13 +26,11 @@ protocol SaveFavoriteUseCase {
 }
 
 final class SaveFavoriteUseCaseImpl: SaveFavoriteUseCase {
-    
     @Injected(\.favoritesRepository) private var favoritesRepository
     
     func execute(details: CurrencyDetails) -> Completable {
         favoritesRepository.save(details: details)
     }
-    
 }
 
 protocol RemoveFavoriteUseCase {
@@ -42,11 +38,9 @@ protocol RemoveFavoriteUseCase {
 }
 
 final class RemoveFavoriteUseCaseImpl: RemoveFavoriteUseCase {
-    
     @Injected(\.favoritesRepository) private var favoritesRepository
     
     func execute(id: String) -> Completable {
         favoritesRepository.remove(id: id)
     }
-    
 }

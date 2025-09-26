@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import FactoryKit
 
 struct MainView: View {
     @Environment(Router.self) private var router
+    private let viewModel = MainViewModel()
     
     var body: some View {
         @Bindable var router = router
@@ -39,6 +41,9 @@ struct MainView: View {
             .tag(TabDestination.settings)
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            viewModel.markOnboardingCompleted()
+        }
     }
 }
 

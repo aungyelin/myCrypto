@@ -6,16 +6,21 @@
 //
 
 import SwiftUI
+import FactoryKit
 
 struct RootContainer: View {
-    @State var router: Router = .init(level: 0, root: .welcome, identifierTab: nil)
+    @State var router: Router
+    
+    init(viewModel: RootViewModel = RootViewModel()) {
+        _router = State(initialValue: Router(level: 0, root: viewModel.isOnboardingDone() ? .main : .welcome, identifierTab: nil))
+    }
     
     var body: some View {
         InnerContainer(router: router) {
             view(for: router.rootView)
         }
         .environment(router)
-        .onAppear(perform: router.setActive)
+        .onAppear { router.setActive() }
         .onDisappear(perform: router.resignActive)
     }
 }

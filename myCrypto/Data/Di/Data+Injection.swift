@@ -22,4 +22,8 @@ extension Container {
         Factory(self) { @MainActor in FavoritesRepositoryImpl() }
     }
     
+    var onboardingRepository: Factory<OnboardingRepository> {
+        Factory(self) { @MainActor in OnboardingRepositoryImpl() }
+    }
+    
 }
