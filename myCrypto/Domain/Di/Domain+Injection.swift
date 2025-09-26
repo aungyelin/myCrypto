@@ -22,4 +22,16 @@ extension Container {
         Factory(self) { @MainActor in GetPriceHistoryUseCaseImpl() }
     }
     
+    var isFavoriteUseCase: Factory<IsFavoriteUseCase> {
+        Factory(self) { @MainActor in IsFavoriteUseCaseImpl() }
+    }
+    
+    var saveFavoriteUseCase: Factory<SaveFavoriteUseCase> {
+        Factory(self) { @MainActor in SaveFavoriteUseCaseImpl() }
+    }
+    
+    var removeFavoriteUseCase: Factory<RemoveFavoriteUseCase> {
+        Factory(self) { @MainActor in RemoveFavoriteUseCaseImpl() }
+    }
+    
 }

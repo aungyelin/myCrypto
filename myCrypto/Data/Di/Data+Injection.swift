@@ -18,4 +18,8 @@ extension Container {
         Factory(self) { @MainActor in CoinRepositoryImpl() }
     }
     
+    var favoritesRepository: Factory<FavoritesRepository> {
+        Factory(self) { @MainActor in FavoritesRepositoryImpl() }
+    }
+    
 }

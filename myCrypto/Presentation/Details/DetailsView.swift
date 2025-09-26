@@ -46,9 +46,9 @@ struct DetailsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    //
+                    viewModel.toggleFavorite()
                 } label: {
-                    Image(systemName: "heart")
+                    Image(systemName: viewModel.isFavorite ? "heart.fill" : "heart")
                         .font(.system(size: 15, weight: .bold))
                 }
                 .tint(.accentColor)

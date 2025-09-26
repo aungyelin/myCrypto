@@ -10,6 +10,7 @@ import Combine
 import RxSwift
 import RxCocoa
 import FactoryKit
+import CoreData
 
 final class DetailsViewModel: ObservableObject {
     
@@ -21,6 +22,9 @@ final class DetailsViewModel: ObservableObject {
     
     @Injected(\.getCurrencyDetailsUseCase) private var getCurrencyDetailsUseCase
     @Injected(\.getPriceHistoryUseCase) private var getPriceHistoryUseCase
+    @Injected(\.isFavoriteUseCase) private var isFavoriteUseCase
+    @Injected(\.saveFavoriteUseCase) private var saveFavoriteUseCase
+    @Injected(\.removeFavoriteUseCase) private var removeFavoriteUseCase
     
     private let disposeBag = DisposeBag()
     
@@ -30,6 +34,7 @@ final class DetailsViewModel: ObservableObject {
     @Published var pricePoints: [PricePoint] = []
     @Published var minPrice: Double? = nil
     @Published var maxPrice: Double? = nil
+    @Published var isFavorite: Bool = false
     
     
     func load(id: String) {
@@ -44,6 +49,13 @@ final class DetailsViewModel: ObservableObject {
         .subscribe(onSuccess: { [weak self] details, history in
             guard let self = self else { return }
             self.details = details
+            
+            self.isFavoriteUseCase.execute(id: id)
+                .observe(on: MainScheduler.instance)
+                .subscribe(onSuccess: { [weak self] value in
+                    self?.isFavorite = value
+                })
+                .disposed(by: self.disposeBag)
             
             let points = history.prices.compactMap { arr -> PricePoint? in
                 guard arr.count >= 2 else { return nil }
@@ -67,11 +79,33 @@ final class DetailsViewModel: ObservableObject {
             self?.isLoading = false
         })
         .disposed(by: disposeBag)
-        
     }
     
     func refresh(id: String) {
         load(id: id)
+    }
+    
+    func toggleFavorite() {
+        guard let details = details else { return }
+        if isFavorite {
+            removeFavoriteUseCase.execute(id: details.id)
+                .observe(on: MainScheduler.instance)
+                .subscribe(onCompleted: { [weak self] in
+                    self?.isFavorite = false
+                }, onError: { error in
+                    print("Failed to remove favorite: \(error)")
+                })
+                .disposed(by: disposeBag)
+        } else {
+            saveFavoriteUseCase.execute(details: details)
+                .observe(on: MainScheduler.instance)
+                .subscribe(onCompleted: { [weak self] in
+                    self?.isFavorite = true
+                }, onError: { error in
+                    print("Failed to save favorite: \(error)")
+                })
+                .disposed(by: disposeBag)
+        }
     }
     
 }
