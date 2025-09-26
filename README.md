@@ -2,6 +2,8 @@
 
 An iOS application for tracking cryptocurrency prices, developed as a coding assignment. This app displays live market data from the CoinGecko API, built with a modern, reactive tech stack. It is also fully compatible with the new iOS 26 Liquid Glass UI.
 
+## **📸 Screenshots**
+
 <p align="center">
   <img src="Screenshots/WelcomeLight.PNG" alt="Welcome Screen Light" width="250"/>
   <img src="Screenshots/HomeLight.PNG" alt="Crypto List Light" width="250"/>
