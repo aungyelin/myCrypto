@@ -61,6 +61,7 @@ Follow these instructions to get the project up and running on your local machin
    cd myCrypto
 
 2. Open the project in Xcode:  
-   Open the myCrypto.xcodeproj file.  
-3. Build and Run:  
+   Open the myCrypto.xcodeproj file.
+   
+4. Build and Run:  
    Select an iOS Simulator or a physical device and press Cmd+R or click the "Run" button in Xcode.
