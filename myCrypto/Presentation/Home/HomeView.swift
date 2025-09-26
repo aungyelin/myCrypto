@@ -24,8 +24,7 @@ struct HomeView: View {
                 portfolioSection
                 marketStatistics
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding()
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .refreshable {

@@ -34,7 +34,7 @@ struct WelcomeView: View {
                 NavigationButton(root: .main) {
                     HStack(spacing: 12) {
                         Text("Get Started")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 18, weight: .semibold))
                         Spacer()
                         Image(systemName: "arrow.right")
                             .font(.system(size: 20, weight: .semibold))
