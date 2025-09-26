@@ -10,6 +10,8 @@ import RxSwift
 
 protocol ApiServiceProtocol {
     func getAllCurrencies() -> Single<CurrenciesResponse>
+    func getCurrencyDetails(id: String) -> Single<CurrencyDetailsResponse>
+    func getPriceHistory(id: String) -> Single<PriceHistoryResponse>
 }
 
 class ApiService: ApiServiceProtocol {
@@ -21,6 +23,14 @@ class ApiService: ApiServiceProtocol {
     
     func getAllCurrencies() -> Single<CurrenciesResponse> {
         return networkManager.request(endpoint: "/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true")
+    }
+    
+    func getCurrencyDetails(id: String) -> Single<CurrencyDetailsResponse> {
+        return networkManager.request(endpoint: "/\(id)")
+    }
+    
+    func getPriceHistory(id: String) -> Single<PriceHistoryResponse> {
+        return networkManager.request(endpoint: "/\(id)/market_chart?vs_currency=usd&days=7")
     }
     
 }

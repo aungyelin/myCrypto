@@ -10,4 +10,6 @@ import RxSwift
 
 protocol CoinRepository {
     func getAllCurrencies() -> Single<[Currency]>
+    func getCurrencyDetails(id: String) -> Single<CurrencyDetails>
+    func getPriceHistory(id: String) -> Single<PriceHistory>
 }

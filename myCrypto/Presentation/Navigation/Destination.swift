@@ -28,7 +28,7 @@ enum TabDestination: Hashable {
 }
 
 enum PushDestination: Hashable {
-    case details
+    case details(currencyID: String)
 }
 
 enum SheetDestination: Hashable, Identifiable {

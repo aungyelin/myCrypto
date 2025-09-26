@@ -16,7 +16,7 @@ import SwiftUI
 
 @ViewBuilder func view(for destination: PushDestination) -> some View {
     switch destination {
-    case .details: DetailsView()
+    case .details(let id): DetailsView(currencyID: id)
     }
 }
 

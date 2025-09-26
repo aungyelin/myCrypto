@@ -58,7 +58,11 @@ final class HomeViewModel: ObservableObject {
                     self?.errorMessage = nil
                     self?.isLoading = false
                 case .error(let error):
-                    self?.errorMessage = error.localizedDescription
+                    if let myError = error as? MyError {
+                        self?.errorMessage = myError.message
+                    } else {
+                        self?.errorMessage = error.localizedDescription
+                    }
                     self?.isLoading = false
                 case .completed:
                     self?.isLoading = false

@@ -88,12 +88,12 @@ struct HomeView: View {
                         Text(String(format: "%.2f%%", abs(portfolioChangePct)))
                             .font(.system(size: 13, weight: .semibold))
                     }
-                    .foregroundColor(Color(hue: 0.33, saturation: 0.9, brightness: 1))
+                    .foregroundColor(.green)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 10)
                     .background(
                         Capsule()
-                            .fill(Color(hue: 0.33, saturation: 0.9, brightness: 0.6))
+                            .fill(.green.opacity(0.2))
                             .opacity(0.95)
                     )
                 }
@@ -220,46 +220,50 @@ struct HomeView: View {
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(homeVM.marketStats, id: \.id) { currency in
-                        HStack(spacing: 12) {
-                            AsyncImage(url: URL(string: currency.image)) { phase in
-                                if let image = phase.image {
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                } else if phase.error != nil {
-                                    Color.gray.opacity(0.3)
-                                } else {
-                                    ProgressView()
+                        NavigationButton(push: .details(currencyID: currency.id)) {
+                            HStack(spacing: 12) {
+                                AsyncImage(url: URL(string: currency.image)) { phase in
+                                    if let image = phase.image {
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                    } else if phase.error != nil {
+                                        Color.gray.opacity(0.3)
+                                    } else {
+                                        ProgressView()
+                                    }
                                 }
-                            }
-                            .frame(width: 36, height: 36)
-                            .clipShape(Circle())
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(currency.name)
-                                    .font(.system(size: 16, weight: .semibold))
-                                Text(currency.symbol.uppercased())
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Spacer()
-                            
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text("$" + currency.currentPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
-                                    .font(.system(size: 16, weight: .semibold))
+                                .frame(width: 36, height: 36)
+                                .clipShape(Circle())
                                 
-                                HStack(spacing: 4) {
-                                    Image(systemName: currency.priceChangePercentage24H >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
-                                        .scaleEffect(x: 1.0, y: 0.5, anchor: .center)
-                                    Text(String(format: "%.2f%%", abs(currency.priceChangePercentage24H)))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(currency.name)
+                                        .font(.system(size: 16, weight: .semibold))
+                                    Text(currency.symbol.uppercased())
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundColor(.secondary)
                                 }
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(currency.priceChangePercentage24H >= 0 ? .green : .red)
+                                
+                                Spacer()
+                                
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text("$" + currency.currentPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                                        .font(.system(size: 16, weight: .semibold))
+                                    
+                                    HStack(spacing: 4) {
+                                        Image(systemName: currency.priceChangePercentage24H >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
+                                            .scaleEffect(x: 1.0, y: 0.5, anchor: .center)
+                                        Text(String(format: "%.2f%%", abs(currency.priceChangePercentage24H)))
+                                    }
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(currency.priceChangePercentage24H >= 0 ? .green : .red)
+                                }
                             }
+                            .padding(.vertical, 4)
+                            .padding(.leading, 1)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, 4)
-                        .padding(.leading, 1)
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -275,77 +279,81 @@ private struct PortfolioRow: View {
     @State private var mockChangePct: Double = 0
 
     var body: some View {
-        HStack(spacing: 12) {
-            AsyncImage(url: URL(string: currency.image)) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } else if phase.error != nil {
-                    Color.gray.opacity(0.3)
-                } else {
-                    ProgressView()
+        NavigationButton(push: .details(currencyID: currency.id)) {
+            HStack(spacing: 12) {
+                AsyncImage(url: URL(string: currency.image)) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    } else if phase.error != nil {
+                        Color.gray.opacity(0.3)
+                    } else {
+                        ProgressView()
+                    }
                 }
-            }
-            .frame(width: 36, height: 36)
-            .clipShape(Circle())
+                .frame(width: 36, height: 36)
+                .clipShape(Circle())
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(currency.name)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(currency.symbol.uppercased())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(currency.name)
+                        .font(.system(size: 16, weight: .semibold))
+                    Text(currency.symbol.uppercased())
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer(minLength: 6)
+
+                Chart {
+                    ForEach(Array(points.enumerated()), id: \.offset) { (i, y) in
+                        LineMark(
+                            x: .value("Index", i),
+                            y: .value("Price", y)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(lineColor)
+
+                        AreaMark(
+                            x: .value("Index", i),
+                            y: .value("Price", y)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .foregroundStyle(LinearGradient(colors: [lineColor.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom))
+                    }
+                }
+                .chartXAxis(.hidden)
+                .chartYAxis(.hidden)
+                .chartLegend(.hidden)
+                .frame(width: 80, height: 20)
+
+                Spacer(minLength: 6)
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("$" + mockPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                        .font(.system(size: 16, weight: .semibold))
+
+                    HStack(spacing: 4) {
+                        Image(systemName: mockChangePct >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
+                            .scaleEffect(x: 1.0, y: 0.5, anchor: .center)
+                        Text(String(format: "%.2f%%", abs(mockChangePct)))
+                    }
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer(minLength: 6)
-
-            Chart {
-                ForEach(Array(points.enumerated()), id: \.offset) { (i, y) in
-                    LineMark(
-                        x: .value("Index", i),
-                        y: .value("Price", y)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    .foregroundStyle(lineColor)
-
-                    AreaMark(
-                        x: .value("Index", i),
-                        y: .value("Price", y)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    .foregroundStyle(LinearGradient(colors: [lineColor.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom))
+                    .foregroundColor(mockChangePct >= 0 ? .green : .red)
                 }
             }
-            .chartXAxis(.hidden)
-            .chartYAxis(.hidden)
-            .chartLegend(.hidden)
-            .frame(width: 80, height: 20)
-
-            Spacer(minLength: 6)
-
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("$" + mockPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
-                    .font(.system(size: 16, weight: .semibold))
-
-                HStack(spacing: 4) {
-                    Image(systemName: mockChangePct >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
-                        .scaleEffect(x: 1.0, y: 0.5, anchor: .center)
-                    Text(String(format: "%.2f%%", abs(mockChangePct)))
+            .padding(.vertical, 6)
+            .padding(.leading, 1)
+            .contentShape(Rectangle())
+            .onAppear {
+                if mockPrice == 0 {
+                    mockPrice = Double.random(in: 50...20_000)
+                    let sign: Double = Bool.random() ? 1 : -1
+                    mockChangePct = sign * Double.random(in: 0.1...20.0)
                 }
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(mockChangePct >= 0 ? .green : .red)
             }
         }
-        .padding(.vertical, 6)
-        .padding(.leading, 1)
-        .onAppear {
-            if mockPrice == 0 {
-                mockPrice = Double.random(in: 50...20_000)
-                let sign: Double = Bool.random() ? 1 : -1
-                mockChangePct = sign * Double.random(in: 0.1...20.0)
-            }
-        }
+        .buttonStyle(.plain)
     }
 
     private var lineColor: Color {

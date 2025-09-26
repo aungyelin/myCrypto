@@ -14,4 +14,12 @@ extension Container {
         Factory(self) { @MainActor in GetAllCurrenciesUseCaseImpl() }
     }
     
+    var getCurrencyDetailsUseCase: Factory<GetCurrencyDetailsUseCase> {
+        Factory(self) { @MainActor in GetCurrencyDetailsUseCaseImpl() }
+    }
+    
+    var getPriceHistoryUseCase: Factory<GetPriceHistoryUseCase> {
+        Factory(self) { @MainActor in GetPriceHistoryUseCaseImpl() }
+    }
+    
 }

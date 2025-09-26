@@ -25,4 +25,28 @@ final class CoinRepositoryImpl: CoinRepository {
             }
     }
     
+    func getCurrencyDetails(id: String) -> Single<CurrencyDetails> {
+        return apiService.getCurrencyDetails(id: id)
+            .map { $0.toDomain() }
+            .catch { error in
+                if let networkError = error as? NetworkError {
+                    return Single.error(networkError.toDomain())
+                } else {
+                    return Single.error(error)
+                }
+            }
+    }
+    
+    func getPriceHistory(id: String) -> Single<PriceHistory> {
+        return apiService.getPriceHistory(id: id)
+            .map { $0.toDomain() }
+            .catch { error in
+                if let networkError = error as? NetworkError {
+                    return Single.error(networkError.toDomain())
+                } else {
+                    return Single.error(error)
+                }
+            }
+    }
+    
 }
