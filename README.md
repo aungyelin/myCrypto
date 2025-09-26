@@ -60,7 +60,7 @@ Follow these instructions to get the project up and running on your local machin
    git clone https://github.com/aungyelin/myCrypto.git
    cd myCrypto
 
-2. Open the project in Xcode:  
+3. Open the project in Xcode:  
    Open the myCrypto.xcodeproj file.
    
 4. Build and Run:  
