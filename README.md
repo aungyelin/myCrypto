@@ -26,6 +26,12 @@ An iOS application for tracking cryptocurrency prices, developed as a coding ass
   * Provides a detailed view for each cryptocurrency, including market cap, volume, and current price.  
   * Visualizes the coin's performance with a 7-day historical price chart.  
   * Allows users to save their favorite coins to a local watchlist using CoreData.
+* **Settings & Preferences**:
+  * Modern, aesthetic iOS grouped layout.
+  * Built-in Appearance toggle (System, Light, Dark).
+  * Full localization support with seamless switching between English, 中文 (Chinese), and 日本語 (Japanese).
+  * Contains fully routed support screens (Help & FAQ, Privacy Policy, Terms of Service) and a direct repository link.
+* **Liquid Glass UI Empty States**: Beautiful, reusable components built for placeholder tabs like Profile, Notifications, Trade, and Market Insights.
 
 ## **🛠️ Technical Stack & Architecture**
 
