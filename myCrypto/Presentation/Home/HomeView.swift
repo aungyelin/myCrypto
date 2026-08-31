@@ -15,6 +15,7 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
+                searchBar
                 portfolioSection
                 marketStatistics
             }
@@ -31,31 +32,64 @@ struct HomeView: View {
     
     private var header: some View {
         HStack {
-            NavigationButton(fullScreen: .profile) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.accent.opacity(0.1))
-                    Image("profile")
-                }
-                .frame(width: 40, height: 40)
-            }
-            .accessibilityLabel("User Profile")
+            TitleLabel("Home")
             
             Spacer()
             
-            NavigationButton(fullScreen: .notification) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.accent.opacity(0.1))
-                    Image(systemName: "bell")
-                        .foregroundColor(.accentColor)
-                        .font(.system(size: 20, weight: .medium))
+            HStack(spacing: 12) {
+                NavigationButton(fullScreen: .profile) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(.accent.opacity(0.1))
+                        Image("profile")
+                            .resizable()
+                            .scaledToFill()
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .frame(width: 40, height: 40)
                 }
-                .frame(width: 40, height: 40)
+                .buttonStyle(.plain)
+                .accessibilityLabel("User Profile")
+                
+                NavigationButton(fullScreen: .notification) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(.accent.opacity(0.1))
+                        Image(systemName: "bell")
+                            .foregroundColor(.accentColor)
+                            .font(.system(size: 20, weight: .medium))
+                    }
+                    .frame(width: 40, height: 40)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Notifications")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Notifications")
         }
+    }
+    
+    private var searchBar: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Search coins...", text: $homeVM.searchText)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            
+            if !homeVM.searchText.isEmpty {
+                Button(action: {
+                    homeVM.searchText = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.systemGray6))
+        )
     }
     
     private var portfolioSection: some View {
@@ -139,22 +173,27 @@ struct HomeView: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(["24 hrs", "Hot", "Profit", "Rising", "Top", "Gainers", "Losers"], id: \.self) { pill in
-                        Text(pill)
-                            .font(.system(size: 14, weight: .semibold))
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Color.accentColor.opacity(0.1))
-                            )
-                            .foregroundColor(.accentColor)
+                    ForEach(HomeViewModel.SortOption.allCases, id: \.self) { option in
+                        Button(action: {
+                            homeVM.selectedSortOption = option
+                        }) {
+                            Text(option.rawValue)
+                                .font(.system(size: 14, weight: .semibold))
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(homeVM.selectedSortOption == option ? Color.accentColor : Color.accentColor.opacity(0.1))
+                                )
+                                .foregroundColor(homeVM.selectedSortOption == option ? .white : .accentColor)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
             .padding(.vertical, 3)
             
-            if homeVM.isLoading && homeVM.marketStats.isEmpty {
+            if homeVM.isLoading && homeVM.displayedMarketStats.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 32)
@@ -164,7 +203,7 @@ struct HomeView: View {
                 }
             } else {
                 LazyVStack(spacing: 12) {
-                    ForEach(homeVM.marketStats, id: \.id) { currency in
+                    ForEach(homeVM.displayedMarketStats, id: \.id) { currency in
                         NavigationButton(push: .details(currencyID: currency.id)) {
                             HStack(spacing: 12) {
                                 CachedImage(url: URL(string: currency.image))
@@ -202,6 +241,16 @@ struct HomeView: View {
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("\(currency.name), \(currency.currentPrice.formatted(.currency(code: "USD")))")
                         .accessibilityValue(currency.priceChangePercentage24H >= 0 ? "Up by \(String(format: "%.2f", currency.priceChangePercentage24H)) percent" : "Down by \(String(format: "%.2f", abs(currency.priceChangePercentage24H))) percent")
+                        .onAppear {
+                            if currency.id == homeVM.displayedMarketStats.last?.id {
+                                homeVM.loadMore()
+                            }
+                        }
+                    }
+                    
+                    if homeVM.isLoading && !homeVM.displayedMarketStats.isEmpty {
+                        ProgressView()
+                            .padding(.vertical, 16)
                     }
                 }
             }

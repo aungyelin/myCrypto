@@ -35,14 +35,48 @@ final class HomeViewModel: ObservableObject {
     
     @Published private(set) var portfolioItems: [PortfolioItem] = []
     
+    enum SortOption: String, CaseIterable {
+        case top = "Top"
+        case gainers = "Gainers"
+        case losers = "Losers"
+    }
+    
+    @Published var searchText: String = ""
+    @Published var selectedSortOption: SortOption = .top
+    
     private let manualRefresh = PublishSubject<Void>()
+    private let loadNextPageTrigger = PublishSubject<Void>()
+    private var currentPage = 1
     
     init() {
         bind()
     }
     
     func refresh() {
+        currentPage = 1
         manualRefresh.onNext(())
+    }
+    
+    func loadMore() {
+        guard !isLoading else { return }
+        currentPage += 1
+        loadNextPageTrigger.onNext(())
+    }
+    
+    var displayedMarketStats: [Currency] {
+        var result = marketStats
+        if !searchText.isEmpty {
+            result = result.filter { $0.name.localizedCaseInsensitiveContains(searchText) || $0.symbol.localizedCaseInsensitiveContains(searchText) }
+        }
+        switch selectedSortOption {
+        case .top:
+            break
+        case .gainers:
+            result.sort { $0.priceChangePercentage24H > $1.priceChangePercentage24H }
+        case .losers:
+            result.sort { $0.priceChangePercentage24H < $1.priceChangePercentage24H }
+        }
+        return result
     }
     
     func generatePortfolio() {
@@ -95,23 +129,44 @@ final class HomeViewModel: ObservableObject {
             .map { _ in () }
             .startWith(())
         
-        Observable<Void>
-            .merge(timer, manualRefresh.asObservable())
-            .do(onNext: { [weak self] in
+        let initialOrRefresh = Observable<Void>.merge(timer, manualRefresh.asObservable())
+            .map { _ in 1 } // Reset to page 1
+            .do(onNext: { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.currentPage = 1
+                    self?.isLoading = true
+                }
+            })
+            
+        let loadMore = loadNextPageTrigger.asObservable()
+            .compactMap { [weak self] _ in self?.currentPage }
+            .do(onNext: { [weak self] _ in
                 DispatchQueue.main.async {
                     self?.isLoading = true
                 }
             })
-            .flatMapLatest {
-                self.getAllCurrenciesUseCase.execute()
+            
+        Observable.merge(initialOrRefresh, loadMore)
+            .flatMapLatest { page in
+                self.getAllCurrenciesUseCase.execute(page: page)
                     .asObservable()
+                    .map { (page, $0) }
                     .materialize()
             }
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] event in
                 switch event {
-                case .next(let currencies):
-                    self?.marketStats = currencies
+                case .next(let result):
+                    let (page, currencies) = result
+                    if page == 1 {
+                        self?.marketStats = currencies
+                    } else {
+                        self?.marketStats.append(contentsOf: currencies)
+                        // Removing duplicates just in case
+                        var seen = Set<String>()
+                        self?.marketStats = self?.marketStats.filter { seen.insert($0.id).inserted } ?? []
+                    }
+                    
                     if self?.portfolioItems.isEmpty == true {
                         self?.generatePortfolio()
                     }
@@ -130,5 +185,4 @@ final class HomeViewModel: ObservableObject {
             })
             .disposed(by: disposeBag)
     }
-    
 }
