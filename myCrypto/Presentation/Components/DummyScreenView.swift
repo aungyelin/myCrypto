@@ -2,15 +2,15 @@
 //  DummyScreenView.swift
 //  myCrypto
 //
-//  Created by Ye Lin Aung on 25/9/2568 BE.
+//  Created by Ye Lin Aung on 31/8/2569 BE.
 //
 
 import SwiftUI
 
 struct DummyScreenView: View {
-    let title: String
+    let title: LocalizedStringKey
     let iconName: String
-    let description: String
+    let description: LocalizedStringKey
     
     var body: some View {
         VStack(spacing: 28) {
