@@ -11,16 +11,11 @@ import Charts
 struct HomeView: View {
     @StateObject private var homeVM = HomeViewModel()
     
-    @State private var portfolioBalance: Double = 12550.50
-    @State private var portfolioChange: Double = 1204.12
-    @State private var portfolioChangePct: Double = 10.75
-    @State private var selectedPortfolioIndices: [Int] = []
-    @State private var sparklineData: [Int: [Double]] = [:]
-    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
+                searchBar
                 portfolioSection
                 marketStatistics
             }
@@ -32,38 +27,69 @@ struct HomeView: View {
         }
         .onAppear {
             homeVM.refresh()
-            generatePortfolio(from: homeVM.marketStats)
-        }
-        .onReceive(homeVM.$marketStats) { newStats in
-            generatePortfolio(from: newStats)
         }
     }
     
     private var header: some View {
         HStack {
-            NavigationButton(fullScreen: .profile) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.accent.opacity(0.1))
-                    Image("profile")
-                }
-                .frame(width: 40, height: 40)
-            }
+            TitleLabel("Home")
             
             Spacer()
             
-            NavigationButton(fullScreen: .notification) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(.accent.opacity(0.1))
-                    Image(systemName: "bell")
-                        .foregroundColor(.accentColor)
-                        .font(.system(size: 20, weight: .medium))
+            HStack(spacing: 12) {
+                NavigationButton(fullScreen: .profile) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(.accent.opacity(0.1))
+                        Image("profile")
+                            .resizable()
+                            .scaledToFill()
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .frame(width: 40, height: 40)
                 }
-                .frame(width: 40, height: 40)
+                .buttonStyle(.plain)
+                .accessibilityLabel("User Profile")
+                
+                NavigationButton(fullScreen: .notification) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(.accent.opacity(0.1))
+                        Image(systemName: "bell")
+                            .foregroundColor(.accentColor)
+                            .font(.system(size: 20, weight: .medium))
+                    }
+                    .frame(width: 40, height: 40)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Notifications")
             }
-            .buttonStyle(.plain)
         }
+    }
+    
+    private var searchBar: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Search coins...", text: $homeVM.searchText)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            
+            if !homeVM.searchText.isEmpty {
+                Button(action: {
+                    homeVM.searchText = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.systemGray6))
+        )
     }
     
     private var portfolioSection: some View {
@@ -75,7 +101,7 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                 
                 HStack(alignment: .center, spacing: 12) {
-                    Text("$" + portfolioBalance.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                    Text(homeVM.portfolioBalance.formatted(.currency(code: "USD")))
                         .font(.system(size: 38, weight: .semibold))
                     
                     Spacer()
@@ -84,7 +110,7 @@ struct HomeView: View {
                         Image(systemName: "arrowtriangle.up.fill")
                             .font(.system(size: 11, weight: .bold))
                             .scaleEffect(x: 1.0, y: 0.6, anchor: .center)
-                        Text(String(format: "%.2f%%", abs(portfolioChangePct)))
+                        Text(String(format: "%.2f%%", abs(homeVM.portfolioChangePct)))
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .foregroundColor(.green)
@@ -95,7 +121,10 @@ struct HomeView: View {
                             .fill(.green.opacity(0.2))
                             .opacity(0.95)
                     )
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Portfolio increased by \(String(format: "%.2f", abs(homeVM.portfolioChangePct))) percent")
                 }
+                .accessibilityElement(children: .combine)
             }
             
             // My Portfolio header
@@ -116,23 +145,18 @@ struct HomeView: View {
             
             // Portfolio list - 5 random currencies with sparkline
             Group {
-                if homeVM.isLoading && portfolioCurrencies().isEmpty {
+                if homeVM.isLoading && homeVM.portfolioItems.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 24)
-                } else if let error = homeVM.errorMessage, portfolioCurrencies().isEmpty {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.system(size: 14, weight: .semibold))
-                        .multilineTextAlignment(.center)
-                        .padding(.vertical, 20)
-                        .frame(maxWidth: .infinity)
+                } else if let error = homeVM.errorMessage, homeVM.portfolioItems.isEmpty {
+                    ErrorStateView(message: error) {
+                        homeVM.refresh()
+                    }
                 } else {
                     LazyVStack(spacing: 12) {
-                        ForEach(portfolioCurrencies(), id: \.id) { currency in
-                            let idx = indexForCurrency(currency)
-                            let points = sparklineData[idx] ?? []
-                            PortfolioRow(currency: currency, points: points)
+                        ForEach(homeVM.portfolioItems) { item in
+                            PortfolioRow(item: item)
                         }
                     }
                 }
@@ -141,48 +165,7 @@ struct HomeView: View {
         .padding(.vertical, 8)
     }
     
-    private func portfolioCurrencies() -> [Currency] {
-        selectedPortfolioIndices.compactMap { idx in
-            guard idx >= 0 && idx < homeVM.marketStats.count else { return nil }
-            return homeVM.marketStats[idx]
-        }
-    }
-    
-    private func indexForCurrency(_ currency: Currency) -> Int {
-        return homeVM.marketStats.firstIndex(where: { $0.id == currency.id }) ?? -1
-    }
-    
-    private func generatePortfolio(from stats: [Currency]) {
-        guard !stats.isEmpty else { return }
-        let count = min(5, stats.count)
-        let indices = Array(0..<stats.count).shuffled().prefix(count)
-        selectedPortfolioIndices = Array(indices)
-        
-        var newSpark: [Int: [Double]] = [:]
-        for idx in selectedPortfolioIndices {
-            guard idx >= 0 && idx < stats.count else { continue }
-            let upward = Bool.random()
-            newSpark[idx] = randomSparkline(upward: upward)
-        }
-        sparklineData = newSpark
-    }
-    
-    private func randomSparkline(upward: Bool, count: Int = 20) -> [Double] {
-        var values: [Double] = []
-        var current = Double.random(in: 0.9...1.1)
-        for _ in 0..<count {
-            let step = Double.random(in: 0.0...0.04)
-            current += (upward ? step : -step) + Double.random(in: -0.02...0.02)
-            current = max(0.1, current)
-            values.append(current)
-        }
-        // Normalize to 0...1 range for nicer chart rendering
-        if let minV = values.min(), let maxV = values.max(), maxV > minV {
-            return values.map { ($0 - minV) / (maxV - minV) }
-        }
-        return values
-    }
-    
+
     private var marketStatistics: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Market Statistics")
@@ -190,50 +173,42 @@ struct HomeView: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(["24 hrs", "Hot", "Profit", "Rising", "Top", "Gainers", "Losers"], id: \.self) { pill in
-                        Text(pill)
-                            .font(.system(size: 14, weight: .semibold))
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Color.accentColor.opacity(0.1))
-                            )
-                            .foregroundColor(.accentColor)
+                    ForEach(HomeViewModel.SortOption.allCases, id: \.self) { option in
+                        Button(action: {
+                            homeVM.selectedSortOption = option
+                        }) {
+                            Text(option.rawValue)
+                                .font(.system(size: 14, weight: .semibold))
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(homeVM.selectedSortOption == option ? Color.accentColor : Color.accentColor.opacity(0.1))
+                                )
+                                .foregroundColor(homeVM.selectedSortOption == option ? .white : .accentColor)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
             .padding(.vertical, 3)
             
-            if homeVM.isLoading && homeVM.marketStats.isEmpty {
+            if homeVM.isLoading && homeVM.displayedMarketStats.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 32)
             } else if let error = homeVM.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.system(size: 14, weight: .semibold))
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 20)
-                    .frame(maxWidth: .infinity)
+                ErrorStateView(message: error) {
+                    homeVM.refresh()
+                }
             } else {
                 LazyVStack(spacing: 12) {
-                    ForEach(homeVM.marketStats, id: \.id) { currency in
+                    ForEach(homeVM.displayedMarketStats, id: \.id) { currency in
                         NavigationButton(push: .details(currencyID: currency.id)) {
                             HStack(spacing: 12) {
-                                AsyncImage(url: URL(string: currency.image)) { phase in
-                                    if let image = phase.image {
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
-                                    } else if phase.error != nil {
-                                        Color.gray.opacity(0.3)
-                                    } else {
-                                        ProgressView()
-                                    }
-                                }
-                                .frame(width: 36, height: 36)
-                                .clipShape(Circle())
+                                CachedImage(url: URL(string: currency.image))
+                                    .frame(width: 36, height: 36)
+                                    .clipShape(Circle())
                                 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(currency.name)
@@ -246,7 +221,7 @@ struct HomeView: View {
                                 Spacer()
                                 
                                 VStack(alignment: .trailing, spacing: 2) {
-                                    Text("$" + currency.currentPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                                    Text(currency.currentPrice.formatted(.currency(code: "USD")))
                                         .font(.system(size: 16, weight: .semibold))
                                     
                                     HStack(spacing: 4) {
@@ -263,6 +238,19 @@ struct HomeView: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(currency.name), \(currency.currentPrice.formatted(.currency(code: "USD")))")
+                        .accessibilityValue(currency.priceChangePercentage24H >= 0 ? "Up by \(String(format: "%.2f", currency.priceChangePercentage24H)) percent" : "Down by \(String(format: "%.2f", abs(currency.priceChangePercentage24H))) percent")
+                        .onAppear {
+                            if currency.id == homeVM.displayedMarketStats.last?.id {
+                                homeVM.loadMore()
+                            }
+                        }
+                    }
+                    
+                    if homeVM.isLoading && !homeVM.displayedMarketStats.isEmpty {
+                        ProgressView()
+                            .padding(.vertical, 16)
                     }
                 }
             }
@@ -271,33 +259,19 @@ struct HomeView: View {
 }
 
 private struct PortfolioRow: View {
-    let currency: Currency
-    let points: [Double]
-    
-    @State private var mockPrice: Double = 0
-    @State private var mockChangePct: Double = 0
+    let item: PortfolioItem
 
     var body: some View {
-        NavigationButton(push: .details(currencyID: currency.id)) {
+        NavigationButton(push: .details(currencyID: item.currency.id)) {
             HStack(spacing: 12) {
-                AsyncImage(url: URL(string: currency.image)) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    } else if phase.error != nil {
-                        Color.gray.opacity(0.3)
-                    } else {
-                        ProgressView()
-                    }
-                }
-                .frame(width: 36, height: 36)
-                .clipShape(Circle())
+                CachedImage(url: URL(string: item.currency.image))
+                    .frame(width: 36, height: 36)
+                    .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(currency.name)
+                    Text(item.currency.name)
                         .font(.system(size: 16, weight: .semibold))
-                    Text(currency.symbol.uppercased())
+                    Text(item.currency.symbol.uppercased())
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
@@ -305,7 +279,7 @@ private struct PortfolioRow: View {
                 Spacer(minLength: 6)
 
                 Chart {
-                    ForEach(Array(points.enumerated()), id: \.offset) { (i, y) in
+                    ForEach(Array(item.sparkline.enumerated()), id: \.offset) { (i, y) in
                         LineMark(
                             x: .value("Index", i),
                             y: .value("Price", y)
@@ -329,34 +303,30 @@ private struct PortfolioRow: View {
                 Spacer(minLength: 6)
 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("$" + mockPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                    Text(item.mockPrice.formatted(.currency(code: "USD")))
                         .font(.system(size: 16, weight: .semibold))
 
                     HStack(spacing: 4) {
-                        Image(systemName: mockChangePct >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
+                        Image(systemName: item.mockChangePct >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
                             .scaleEffect(x: 1.0, y: 0.5, anchor: .center)
-                        Text(String(format: "%.2f%%", abs(mockChangePct)))
+                        Text(String(format: "%.2f%%", abs(item.mockChangePct)))
                     }
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(mockChangePct >= 0 ? .green : .red)
+                    .foregroundColor(item.mockChangePct >= 0 ? .green : .red)
                 }
             }
             .padding(.vertical, 6)
             .padding(.leading, 1)
             .contentShape(Rectangle())
-            .onAppear {
-                if mockPrice == 0 {
-                    mockPrice = Double.random(in: 50...20_000)
-                    let sign: Double = Bool.random() ? 1 : -1
-                    mockChangePct = sign * Double.random(in: 0.1...20.0)
-                }
-            }
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(item.currency.name), Portfolio balance \(item.mockPrice.formatted(.currency(code: "USD")))")
+        .accessibilityValue(item.mockChangePct >= 0 ? "Up by \(String(format: "%.2f", item.mockChangePct)) percent" : "Down by \(String(format: "%.2f", abs(item.mockChangePct))) percent")
     }
 
     private var lineColor: Color {
-        mockChangePct >= 0 ? .green : .red
+        item.mockChangePct >= 0 ? .green : .red
     }
 }
 

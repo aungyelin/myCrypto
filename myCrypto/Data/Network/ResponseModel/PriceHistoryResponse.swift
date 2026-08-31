@@ -10,5 +10,5 @@ import Foundation
 typealias PriceHistoryResponse = PriceHistoryDto
 
 struct PriceHistoryDto: Codable {
-    let prices: [[Double]]
+    let prices: [[Double]]?
 }

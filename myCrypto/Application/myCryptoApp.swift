@@ -12,9 +12,14 @@ import CoreData
 struct myCryptoApp: App {
     let persistenceController = PersistenceController.shared
 
+    @AppStorage("appAppearance") private var appearance: AppAppearance = .system
+    @AppStorage("appLanguage") private var language: AppLanguage = .english
+
     var body: some Scene {
         WindowGroup {
             RootContainer()
+                .preferredColorScheme(appearance.colorScheme)
+                .environment(\.locale, language.locale)
         }
     }
 }

@@ -36,6 +36,9 @@ import SwiftUI
         switch destination {
         case .profile: ProfileView()
         case .notification: NotificationsView()
+        case .helpAndFAQ: HelpAndFAQView()
+        case .privacyPolicy: PrivacyPolicyView()
+        case .termsOfService: TermsOfServiceView()
         }
     }
 }

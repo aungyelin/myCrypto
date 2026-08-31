@@ -12,7 +12,7 @@ extension PriceHistoryDto: DomainMappable {
     typealias T = PriceHistory
     
     func toDomain() -> PriceHistory {
-        return PriceHistory(prices: self.prices)
+        return PriceHistory(prices: self.prices ?? [])
     }
     
 }

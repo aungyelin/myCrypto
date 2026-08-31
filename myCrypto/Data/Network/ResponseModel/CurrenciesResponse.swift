@@ -14,8 +14,8 @@ struct CurrencyDto: Codable {
     let symbol: String
     let name: String
     let image: String
-    let currentPrice: Double
-    let priceChangePercentage24H: Double
+    let currentPrice: Double?
+    let priceChangePercentage24H: Double?
 
     enum CodingKeys: String, CodingKey {
         case id, symbol, name, image
