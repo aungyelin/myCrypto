@@ -11,12 +11,6 @@ import Charts
 struct HomeView: View {
     @StateObject private var homeVM = HomeViewModel()
     
-    @State private var portfolioBalance: Double = 12550.50
-    @State private var portfolioChange: Double = 1204.12
-    @State private var portfolioChangePct: Double = 10.75
-    @State private var selectedPortfolioIndices: [Int] = []
-    @State private var sparklineData: [Int: [Double]] = [:]
-    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -32,10 +26,6 @@ struct HomeView: View {
         }
         .onAppear {
             homeVM.refresh()
-            generatePortfolio(from: homeVM.marketStats)
-        }
-        .onReceive(homeVM.$marketStats) { newStats in
-            generatePortfolio(from: newStats)
         }
     }
     
@@ -75,7 +65,7 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                 
                 HStack(alignment: .center, spacing: 12) {
-                    Text("$" + portfolioBalance.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                    Text("$" + homeVM.portfolioBalance.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
                         .font(.system(size: 38, weight: .semibold))
                     
                     Spacer()
@@ -84,7 +74,7 @@ struct HomeView: View {
                         Image(systemName: "arrowtriangle.up.fill")
                             .font(.system(size: 11, weight: .bold))
                             .scaleEffect(x: 1.0, y: 0.6, anchor: .center)
-                        Text(String(format: "%.2f%%", abs(portfolioChangePct)))
+                        Text(String(format: "%.2f%%", abs(homeVM.portfolioChangePct)))
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .foregroundColor(.green)
@@ -116,11 +106,11 @@ struct HomeView: View {
             
             // Portfolio list - 5 random currencies with sparkline
             Group {
-                if homeVM.isLoading && portfolioCurrencies().isEmpty {
+                if homeVM.isLoading && homeVM.portfolioCurrencies().isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 24)
-                } else if let error = homeVM.errorMessage, portfolioCurrencies().isEmpty {
+                } else if let error = homeVM.errorMessage, homeVM.portfolioCurrencies().isEmpty {
                     Text(error)
                         .foregroundColor(.red)
                         .font(.system(size: 14, weight: .semibold))
@@ -129,9 +119,9 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity)
                 } else {
                     LazyVStack(spacing: 12) {
-                        ForEach(portfolioCurrencies(), id: \.id) { currency in
-                            let idx = indexForCurrency(currency)
-                            let points = sparklineData[idx] ?? []
+                        ForEach(homeVM.portfolioCurrencies(), id: \.id) { currency in
+                            let idx = homeVM.indexForCurrency(currency)
+                            let points = homeVM.sparklineData[idx] ?? []
                             PortfolioRow(currency: currency, points: points)
                         }
                     }
@@ -141,48 +131,7 @@ struct HomeView: View {
         .padding(.vertical, 8)
     }
     
-    private func portfolioCurrencies() -> [Currency] {
-        selectedPortfolioIndices.compactMap { idx in
-            guard idx >= 0 && idx < homeVM.marketStats.count else { return nil }
-            return homeVM.marketStats[idx]
-        }
-    }
-    
-    private func indexForCurrency(_ currency: Currency) -> Int {
-        return homeVM.marketStats.firstIndex(where: { $0.id == currency.id }) ?? -1
-    }
-    
-    private func generatePortfolio(from stats: [Currency]) {
-        guard !stats.isEmpty else { return }
-        let count = min(5, stats.count)
-        let indices = Array(0..<stats.count).shuffled().prefix(count)
-        selectedPortfolioIndices = Array(indices)
-        
-        var newSpark: [Int: [Double]] = [:]
-        for idx in selectedPortfolioIndices {
-            guard idx >= 0 && idx < stats.count else { continue }
-            let upward = Bool.random()
-            newSpark[idx] = randomSparkline(upward: upward)
-        }
-        sparklineData = newSpark
-    }
-    
-    private func randomSparkline(upward: Bool, count: Int = 20) -> [Double] {
-        var values: [Double] = []
-        var current = Double.random(in: 0.9...1.1)
-        for _ in 0..<count {
-            let step = Double.random(in: 0.0...0.04)
-            current += (upward ? step : -step) + Double.random(in: -0.02...0.02)
-            current = max(0.1, current)
-            values.append(current)
-        }
-        // Normalize to 0...1 range for nicer chart rendering
-        if let minV = values.min(), let maxV = values.max(), maxV > minV {
-            return values.map { ($0 - minV) / (maxV - minV) }
-        }
-        return values
-    }
-    
+
     private var marketStatistics: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Market Statistics")
