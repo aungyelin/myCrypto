@@ -41,6 +41,9 @@ enum SheetDestination: Hashable, Identifiable {
 enum FullScreenDestination: Hashable, Identifiable {
     case profile
     case notification
+    case helpAndFAQ
+    case privacyPolicy
+    case termsOfService
     
     var id: UUID { UUID() }
 }

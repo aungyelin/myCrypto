@@ -51,6 +51,23 @@ struct SettingsView: View {
                     // DEVELOPER SECTION
                     SettingsSection(title: "Developer", icon: "person.crop.circle.fill") {
                         SettingsRowLink(title: "Website", icon: "link", color: .teal, url: "https://yelinaung.dev/", linkText: "yelinaung.dev")
+                        Divider()
+                        SettingsRowLink(title: "Source Code", icon: "curlybraces", color: .purple, url: "https://github.com/aungyelin/myCrypto", linkText: "GitHub")
+                    }
+                    
+                    // SUPPORT & LEGAL SECTION
+                    SettingsSection(title: "Support & Legal", icon: "questionmark.circle.fill") {
+                        SettingsRowButton(title: "Help & FAQ", icon: "questionmark.bubble.fill", color: .orange) {
+                            router.present(fullScreen: .helpAndFAQ)
+                        }
+                        Divider()
+                        SettingsRowButton(title: "Privacy Policy", icon: "hand.raised.fill", color: .blue) {
+                            router.present(fullScreen: .privacyPolicy)
+                        }
+                        Divider()
+                        SettingsRowButton(title: "Terms of Service", icon: "doc.text.fill", color: .purple) {
+                            router.present(fullScreen: .termsOfService)
+                        }
                     }
                     
                     // APPLICATION SECTION
@@ -176,7 +193,7 @@ struct SettingsRowLink: View {
     let icon: String
     let color: Color
     let url: String
-    let linkText: String
+    let linkText: LocalizedStringKey
     
     var body: some View {
         HStack(spacing: 16) {
@@ -193,6 +210,33 @@ struct SettingsRowLink: View {
                     .foregroundColor(.accentColor)
             }
         }
+    }
+}
+
+struct SettingsRowButton: View {
+    let title: LocalizedStringKey
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                SettingIcon(icon: icon, color: color)
+                
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color(UIColor.tertiaryLabel))
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
