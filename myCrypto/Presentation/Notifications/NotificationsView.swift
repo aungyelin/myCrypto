@@ -11,7 +11,11 @@ struct NotificationsView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        Text("NotificationsView")
+        DummyScreenView(
+            title: "Notifications",
+            iconName: "bell.badge",
+            description: "Stay updated with price alerts, portfolio changes, and the latest crypto news."
+        )
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

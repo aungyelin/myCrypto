@@ -11,7 +11,11 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        Text("ProfileView")
+        DummyScreenView(
+            title: "Your Profile",
+            iconName: "person.crop.circle.badge.checkmark",
+            description: "Manage your account, security, and preferences right here. We're launching soon!"
+        )
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

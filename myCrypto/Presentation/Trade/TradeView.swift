@@ -11,7 +11,13 @@ struct TradeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             TitleLabel("Trade")
-            Spacer()
+            
+            DummyScreenView(
+                title: "Trade & Swap",
+                iconName: "arrow.left.arrow.right.circle",
+                description: "Instantly buy, sell, or swap cryptocurrencies with the lowest fees."
+            )
+            .padding(.top, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 20)
