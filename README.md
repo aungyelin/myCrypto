@@ -2,25 +2,22 @@
 
 An iOS application for tracking cryptocurrency prices, developed as a coding assignment. This app displays live market data from the CoinGecko API, built with a modern, reactive tech stack. It is also fully compatible with the new iOS 26 Liquid Glass UI.
 
-## **📸 Screenshots**
-
 <p align="center">
-  <img src="Screenshots/WelcomeLight.PNG" alt="Welcome Screen Light" width="250"/>
-  <img src="Screenshots/HomeLight.PNG" alt="Crypto List Light" width="250"/>
-  <img src="Screenshots/DetailsLight.PNG" alt="Coin Details Light" width="250"/>
-</p>
-<p align="center">
-  <img src="Screenshots/WelcomeDark.PNG" alt="Welcome Screen Dark" width="250"/>
-  <img src="Screenshots/HomeDark.PNG" alt="Crypto List Dark" width="250"/>
-  <img src="Screenshots/DetailsDark.PNG" alt="Coin Details Dark" width="250"/>
+  <img src="Screenshots/Cover.png" alt="myCrypto Cover"/>
+  <br/>
+  <br/>
+  <img src="Screenshots/Demo.png" alt="myCrypto Demo"/>
 </p>
 
 ## **✨ Features**
 
 * **Welcome Screen**: A simple and clean introductory screen to onboard the user.  
 * **Crypto List Screen**:  
-  * Displays a real-time list of cryptocurrencies with essential data: name, symbol, current price, 24-hour percentage change, market cap, and trading volume.  
-  * Shows a mock portfolio balance and performance chart for demonstration.  
+  * Displays a real-time list of cryptocurrencies with essential data: name, symbol, current price, and 24-hour percentage change.
+  * **Search & Filter**: Find specific cryptocurrencies instantly by name or symbol.
+  * **Sorting**: Quickly sort the market list by Top (Market Cap), Top Gainers, or Top Losers.
+  * **Pagination**: Infinite scrolling allows seamless browsing through the entire cryptocurrency market.
+  * Shows a mock portfolio balance and performance sparklines for demonstration.  
   * Implements pull-to-refresh functionality to fetch the latest market data.  
 * **Coin Details Screen**:  
   * Provides a detailed view for each cryptocurrency, including market cap, volume, and current price.  
@@ -31,14 +28,17 @@ An iOS application for tracking cryptocurrency prices, developed as a coding ass
   * Built-in Appearance toggle (System, Light, Dark).
   * Full localization support with seamless switching between English, 中文 (Chinese), and 日本語 (Japanese).
   * Contains fully routed support screens (Help & FAQ, Privacy Policy, Terms of Service) and a direct repository link.
-* **Liquid Glass UI Empty States**: Beautiful, reusable components built for placeholder tabs like Profile, Notifications, Trade, and Market Insights.
+* **Liquid Glass UI Empty States & Error Handling**: Beautiful, reusable components built for placeholder tabs, and user-friendly network error states featuring one-tap retry functionality.
 
 ## **🛠️ Technical Stack & Architecture**
 
-* **UI**: **SwiftUI** for a modern, declarative user interface.  
-* **Reactive Programming**: **RxSwift** and **RxCocoa** to handle asynchronous operations, API calls, and UI updates reactively.  
-* **Networking**: **Alamofire** for robust and simplified RESTful API communication.  
-* **Local Storage**: **CoreData** for persisting the user's favorite coins on the device.  
+* **UI**: **SwiftUI** for a modern, declarative user interface, optimized with `CachedImage` (`NSCache`) for high-performance scrolling.
+* **Networking**: Native **URLSession** and modern **Swift Concurrency (`async/await`)** for robust RESTful API communication without third-party dependencies.
+* **Reactive Programming**: **RxSwift** and **RxCocoa** are utilized within the domain and presentation layers to handle reactive data streams and UI bindings.
+* **Local Storage**: **CoreData** for persisting the user's favorite coins on the device.
+* **State Management**: **@AppStorage (UserDefaults)** for user preferences and **@Published** (`ObservableObject`) for view model state tracking.
+* **Navigation**: A custom **Router** pattern using `NavigationStack`, enabling deep decoupled programmatic navigation.
+* **Localization**: Modern **String Catalogs** (`.xcstrings`) to efficiently manage multi-language support (English, Chinese, Japanese).
 * **Architecture**: The project follows **Clean Architecture** principles combined with the **MVVM (Model-View-ViewModel)** pattern. This approach ensures a robust separation of concerns, enhances testability, and promotes a highly maintainable and scalable codebase.
 
 ## **🔗 API Integration**
