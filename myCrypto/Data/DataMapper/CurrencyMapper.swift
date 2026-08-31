@@ -17,8 +17,8 @@ extension CurrencyDto: DomainMappable {
             symbol: self.symbol,
             name: self.name,
             image: self.image,
-            currentPrice: self.currentPrice,
-            priceChangePercentage24H: self.priceChangePercentage24H
+            currentPrice: self.currentPrice ?? 0.0,
+            priceChangePercentage24H: self.priceChangePercentage24H ?? 0.0
         )
     }
     

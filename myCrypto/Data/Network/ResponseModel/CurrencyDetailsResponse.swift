@@ -14,7 +14,7 @@ struct CurrencyDetailsDto: Codable {
     let symbol: String
     let name: String
     let image: ImageDto
-    let marketData: MarketDataDto
+    let marketData: MarketDataDto?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -32,11 +32,11 @@ struct ImageDto: Codable {
 }
 
 struct MarketDataDto: Codable {
-    let currentPrice: PriceDto
-    let marketCap: PriceDto
-    let marketCapRank: Int
-    let totalVolume: PriceDto
-    let priceChangePercentage24H: PriceDto
+    let currentPrice: PriceDto?
+    let marketCap: PriceDto?
+    let marketCapRank: Int?
+    let totalVolume: PriceDto?
+    let priceChangePercentage24H: PriceDto?
     
     enum CodingKeys: String, CodingKey {
         case currentPrice = "current_price"
@@ -48,5 +48,5 @@ struct MarketDataDto: Codable {
 }
 
 struct PriceDto: Codable {
-    let usd: Double
+    let usd: Double?
 }

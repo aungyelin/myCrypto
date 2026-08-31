@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct TitleLabel: View {
-    let text: String
+    let text: LocalizedStringKey
 
-    init(_ text: String) {
+    init(_ text: LocalizedStringKey) {
         self.text = text
     }
 

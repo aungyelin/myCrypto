@@ -10,15 +10,15 @@ import RxSwift
 import FactoryKit
 
 protocol GetAllCurrenciesUseCase {
-    func execute() -> Single<[Currency]>
+    func execute(page: Int) -> Single<[Currency]>
 }
 
 final class GetAllCurrenciesUseCaseImpl: GetAllCurrenciesUseCase {
     
     @Injected(\.coinRepository) private var coinRepository
     
-    func execute() -> Single<[Currency]> {
-        coinRepository.getAllCurrencies()
+    func execute(page: Int = 1) -> Single<[Currency]> {
+        coinRepository.getAllCurrencies(page: page)
     }
     
 }

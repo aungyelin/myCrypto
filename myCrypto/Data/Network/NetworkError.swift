@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Alamofire
 
 struct NetworkError: Error {
     let message: String

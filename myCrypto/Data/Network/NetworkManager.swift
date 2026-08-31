@@ -6,63 +6,76 @@
 //
 
 import Foundation
-import Alamofire
-import RxSwift
+
+enum AppEnvironment {
+    case development
+    case staging
+    case production
+}
+
+struct AppConfiguration {
+    static let shared = AppConfiguration()
+    
+    var environment: AppEnvironment = .production
+    
+    var apiBaseURL: String {
+        switch environment {
+        case .development, .staging, .production:
+            return "https://api.coingecko.com/api/v3/coins"
+        }
+    }
+}
 
 class NetworkManager {
     
     static let shared = NetworkManager()
     
-    private let baseURL = "https://api.coingecko.com/api/v3/coins"
-    
-    
-    private func request<T: Decodable>(
-        url: String,
-        method: HTTPMethod = .get,
-        parameters: Parameters? = nil,
-        headers: HTTPHeaders? = nil
-    ) -> Single<T> {
-        return Single.create { single in
-            let request = AF.request(
-                url,
-                method: method,
-                parameters: parameters,
-                encoding: JSONEncoding.default,
-                headers: headers
-            )
-                .validate()
-                .responseDecodable(of: T.self) { response in
-                    self.printResponse(response)
-                    switch response.result {
-                    case .success(let value): single(.success(value))
-                    case .failure(_):
-                        if let data = response.data, let decodedError = self.decodeNetworkError(from: data) {
-                            single(.failure(decodedError))
-                        } else {
-                            single(.failure(NetworkError(message: response.error?.localizedDescription ?? "Network Error")))
-                        }
-                    }
-                }
-            return Disposables.create { request.cancel() }
-        }
-    }
+    private let baseURL = AppConfiguration.shared.apiBaseURL
     
     func request<T: Decodable>(
         endpoint: String,
-        method: HTTPMethod = .get,
-        parameters: Parameters? = nil,
-        headers: HTTPHeaders? = nil
-    ) -> Single<T> {
-        let fullURL = baseURL + endpoint
+        method: String = "GET",
+        queryItems: [URLQueryItem]? = nil
+    ) async throws -> T {
+        var urlComponents = URLComponents(string: baseURL + endpoint)
+        if let queryItems = queryItems {
+            urlComponents?.queryItems = queryItems
+        }
         
-        return self.request(
-            url: fullURL,
-            method: method,
-            parameters: parameters,
-            headers: headers
-        )
+        guard let url = urlComponents?.url else {
+            throw NetworkError(message: "Invalid URL")
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        
+        printResponse(url: url.absoluteString, method: method)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError(message: "Invalid Response")
+        }
+        
+        printResponse(url: url.absoluteString, method: method, statusCode: httpResponse.statusCode, data: data)
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let decodedError = decodeNetworkError(from: data) {
+                throw decodedError
+            } else {
+                throw NetworkError(message: "Server Error: \(httpResponse.statusCode)")
+            }
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let result = try decoder.decode(T.self, from: data)
+            return result
+        } catch {
+            throw NetworkError(message: "Decoding Error: \(error.localizedDescription)")
+        }
     }
-
+    
     private func decodeNetworkError(from data: Data) -> NetworkError? {
         let decoder = JSONDecoder()
         
@@ -75,7 +88,6 @@ class NetworkManager {
             }
         }
         
-        // Try some common fallback shapes if the API changes
         struct GenericErrorMessage: Decodable { let message: String?; let error: String?; let error_message: String? }
         if let generic = try? decoder.decode(GenericErrorMessage.self, from: data) {
             if let msg = generic.message ?? generic.error ?? generic.error_message, !msg.isEmpty {
@@ -86,27 +98,22 @@ class NetworkManager {
         return nil
     }
     
-    private func printResponse<T>(_ response: DataResponse<T, AFError>) {
-        let url = response.request?.url?.absoluteString ?? "<unknown URL>"
-        let method = response.request?.method?.rawValue ?? "<unknown method>"
-        let statusCode = response.response?.statusCode
-        print("\n===== 📡 Network Response =====")
-        print("➡️ URL: \(method) \(url)")
-        if let statusCode { print("📦 Status: \(statusCode)") }
-        if let headers = response.response?.allHeaderFields as? [String: Any], !headers.isEmpty {
-            print("🧾 Headers: \(headers)")
-        }
-        if let data = response.data {
-            if let bodyString = String(data: data, encoding: .utf8) {
-                print("📝 Body:\n\(bodyString)")
-            } else {
-                print("📝 Body: <non-UTF8 data, \(data.count) bytes>")
+    private func printResponse(url: String, method: String, statusCode: Int? = nil, data: Data? = nil) {
+        if statusCode == nil {
+            print("\n===== 📡 Network Request =====")
+            print("➡️ URL: \(method) \(url)")
+        } else {
+            print("\n===== 📡 Network Response =====")
+            print("➡️ URL: \(method) \(url)")
+            if let statusCode = statusCode { print("📦 Status: \(statusCode)") }
+            if let data = data {
+                if let bodyString = String(data: data, encoding: .utf8) {
+                    print("📝 Body:\n\(bodyString)")
+                } else {
+                    print("📝 Body: <non-UTF8 data, \(data.count) bytes>")
+                }
             }
+            print("===== 📡 End Response =====\n")
         }
-        if let error = response.error {
-            print("❌ Error: \(error.localizedDescription)")
-        }
-        print("===== 📡 End Response =====\n")
     }
-    
 }
