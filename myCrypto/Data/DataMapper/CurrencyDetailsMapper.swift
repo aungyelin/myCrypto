@@ -17,11 +17,11 @@ extension CurrencyDetailsDto: DomainMappable {
             symbol: self.symbol,
             name: self.name,
             image: self.image.large,
-            currentPrice: self.marketData.currentPrice.usd,
-            marketCap: self.marketData.marketCap.usd,
-            marketCapRank: self.marketData.marketCapRank,
-            totalVolume: self.marketData.totalVolume.usd,
-            priceChangePercentage24H: self.marketData.priceChangePercentage24H.usd
+            currentPrice: self.marketData?.currentPrice?.usd ?? 0.0,
+            marketCap: self.marketData?.marketCap?.usd ?? 0.0,
+            marketCapRank: self.marketData?.marketCapRank ?? 0,
+            totalVolume: self.marketData?.totalVolume?.usd ?? 0.0,
+            priceChangePercentage24H: self.marketData?.priceChangePercentage24H?.usd ?? 0.0
         )
     }
     
