@@ -11,6 +11,14 @@ import RxSwift
 import RxCocoa
 import FactoryKit
 
+struct PortfolioItem: Identifiable {
+    let id: String
+    let currency: Currency
+    let sparkline: [Double]
+    let mockPrice: Double
+    let mockChangePct: Double
+}
+
 final class HomeViewModel: ObservableObject {
     
     @Injected(\.getAllCurrenciesUseCase) private var getAllCurrenciesUseCase
@@ -24,8 +32,8 @@ final class HomeViewModel: ObservableObject {
     @Published private(set) var portfolioBalance: Double = 12550.50
     @Published private(set) var portfolioChange: Double = 1204.12
     @Published private(set) var portfolioChangePct: Double = 10.75
-    @Published private(set) var selectedPortfolioIndices: [Int] = []
-    @Published private(set) var sparklineData: [Int: [Double]] = [:]
+    
+    @Published private(set) var portfolioItems: [PortfolioItem] = []
     
     private let manualRefresh = PublishSubject<Void>()
     
@@ -42,15 +50,27 @@ final class HomeViewModel: ObservableObject {
         guard !stats.isEmpty else { return }
         let count = min(5, stats.count)
         let indices = Array(0..<stats.count).shuffled().prefix(count)
-        selectedPortfolioIndices = Array(indices)
         
-        var newSpark: [Int: [Double]] = [:]
-        for idx in selectedPortfolioIndices {
+        var newItems: [PortfolioItem] = []
+        for idx in indices {
             guard idx >= 0 && idx < stats.count else { continue }
+            let currency = stats[idx]
             let upward = Bool.random()
-            newSpark[idx] = randomSparkline(upward: upward)
+            let sparkline = randomSparkline(upward: upward)
+            
+            let mockPrice = Double.random(in: 50...20_000)
+            let sign: Double = Bool.random() ? 1 : -1
+            let mockChangePct = sign * Double.random(in: 0.1...20.0)
+            
+            newItems.append(PortfolioItem(
+                id: currency.id,
+                currency: currency,
+                sparkline: sparkline,
+                mockPrice: mockPrice,
+                mockChangePct: mockChangePct
+            ))
         }
-        sparklineData = newSpark
+        portfolioItems = newItems
     }
     
     private func randomSparkline(upward: Bool, count: Int = 20) -> [Double] {
@@ -67,17 +87,7 @@ final class HomeViewModel: ObservableObject {
         }
         return values
     }
-    
-    func portfolioCurrencies() -> [Currency] {
-        selectedPortfolioIndices.compactMap { idx in
-            guard idx >= 0 && idx < marketStats.count else { return nil }
-            return marketStats[idx]
-        }
-    }
-    
-    func indexForCurrency(_ currency: Currency) -> Int {
-        return marketStats.firstIndex(where: { $0.id == currency.id }) ?? -1
-    }
+
     
     private func bind() {
         let timer = Observable<Int>
@@ -102,7 +112,7 @@ final class HomeViewModel: ObservableObject {
                 switch event {
                 case .next(let currencies):
                     self?.marketStats = currencies
-                    if self?.selectedPortfolioIndices.isEmpty == true {
+                    if self?.portfolioItems.isEmpty == true {
                         self?.generatePortfolio()
                     }
                     self?.errorMessage = nil

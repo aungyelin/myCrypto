@@ -39,6 +39,7 @@ struct HomeView: View {
                 }
                 .frame(width: 40, height: 40)
             }
+            .accessibilityLabel("User Profile")
             
             Spacer()
             
@@ -53,6 +54,7 @@ struct HomeView: View {
                 .frame(width: 40, height: 40)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Notifications")
         }
     }
     
@@ -65,7 +67,7 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                 
                 HStack(alignment: .center, spacing: 12) {
-                    Text("$" + homeVM.portfolioBalance.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                    Text(homeVM.portfolioBalance.formatted(.currency(code: "USD")))
                         .font(.system(size: 38, weight: .semibold))
                     
                     Spacer()
@@ -85,7 +87,10 @@ struct HomeView: View {
                             .fill(.green.opacity(0.2))
                             .opacity(0.95)
                     )
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Portfolio increased by \(String(format: "%.2f", abs(homeVM.portfolioChangePct))) percent")
                 }
+                .accessibilityElement(children: .combine)
             }
             
             // My Portfolio header
@@ -106,23 +111,18 @@ struct HomeView: View {
             
             // Portfolio list - 5 random currencies with sparkline
             Group {
-                if homeVM.isLoading && homeVM.portfolioCurrencies().isEmpty {
+                if homeVM.isLoading && homeVM.portfolioItems.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 24)
-                } else if let error = homeVM.errorMessage, homeVM.portfolioCurrencies().isEmpty {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.system(size: 14, weight: .semibold))
-                        .multilineTextAlignment(.center)
-                        .padding(.vertical, 20)
-                        .frame(maxWidth: .infinity)
+                } else if let error = homeVM.errorMessage, homeVM.portfolioItems.isEmpty {
+                    ErrorStateView(message: error) {
+                        homeVM.refresh()
+                    }
                 } else {
                     LazyVStack(spacing: 12) {
-                        ForEach(homeVM.portfolioCurrencies(), id: \.id) { currency in
-                            let idx = homeVM.indexForCurrency(currency)
-                            let points = homeVM.sparklineData[idx] ?? []
-                            PortfolioRow(currency: currency, points: points)
+                        ForEach(homeVM.portfolioItems) { item in
+                            PortfolioRow(item: item)
                         }
                     }
                 }
@@ -159,30 +159,17 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 32)
             } else if let error = homeVM.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.system(size: 14, weight: .semibold))
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 20)
-                    .frame(maxWidth: .infinity)
+                ErrorStateView(message: error) {
+                    homeVM.refresh()
+                }
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(homeVM.marketStats, id: \.id) { currency in
                         NavigationButton(push: .details(currencyID: currency.id)) {
                             HStack(spacing: 12) {
-                                AsyncImage(url: URL(string: currency.image)) { phase in
-                                    if let image = phase.image {
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
-                                    } else if phase.error != nil {
-                                        Color.gray.opacity(0.3)
-                                    } else {
-                                        ProgressView()
-                                    }
-                                }
-                                .frame(width: 36, height: 36)
-                                .clipShape(Circle())
+                                CachedImage(url: URL(string: currency.image))
+                                    .frame(width: 36, height: 36)
+                                    .clipShape(Circle())
                                 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(currency.name)
@@ -195,7 +182,7 @@ struct HomeView: View {
                                 Spacer()
                                 
                                 VStack(alignment: .trailing, spacing: 2) {
-                                    Text("$" + currency.currentPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                                    Text(currency.currentPrice.formatted(.currency(code: "USD")))
                                         .font(.system(size: 16, weight: .semibold))
                                     
                                     HStack(spacing: 4) {
@@ -212,6 +199,9 @@ struct HomeView: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(currency.name), \(currency.currentPrice.formatted(.currency(code: "USD")))")
+                        .accessibilityValue(currency.priceChangePercentage24H >= 0 ? "Up by \(String(format: "%.2f", currency.priceChangePercentage24H)) percent" : "Down by \(String(format: "%.2f", abs(currency.priceChangePercentage24H))) percent")
                     }
                 }
             }
@@ -220,33 +210,19 @@ struct HomeView: View {
 }
 
 private struct PortfolioRow: View {
-    let currency: Currency
-    let points: [Double]
-    
-    @State private var mockPrice: Double = 0
-    @State private var mockChangePct: Double = 0
+    let item: PortfolioItem
 
     var body: some View {
-        NavigationButton(push: .details(currencyID: currency.id)) {
+        NavigationButton(push: .details(currencyID: item.currency.id)) {
             HStack(spacing: 12) {
-                AsyncImage(url: URL(string: currency.image)) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    } else if phase.error != nil {
-                        Color.gray.opacity(0.3)
-                    } else {
-                        ProgressView()
-                    }
-                }
-                .frame(width: 36, height: 36)
-                .clipShape(Circle())
+                CachedImage(url: URL(string: item.currency.image))
+                    .frame(width: 36, height: 36)
+                    .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(currency.name)
+                    Text(item.currency.name)
                         .font(.system(size: 16, weight: .semibold))
-                    Text(currency.symbol.uppercased())
+                    Text(item.currency.symbol.uppercased())
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
@@ -254,7 +230,7 @@ private struct PortfolioRow: View {
                 Spacer(minLength: 6)
 
                 Chart {
-                    ForEach(Array(points.enumerated()), id: \.offset) { (i, y) in
+                    ForEach(Array(item.sparkline.enumerated()), id: \.offset) { (i, y) in
                         LineMark(
                             x: .value("Index", i),
                             y: .value("Price", y)
@@ -278,34 +254,30 @@ private struct PortfolioRow: View {
                 Spacer(minLength: 6)
 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("$" + mockPrice.formatted(.number.locale(Locale(identifier: "en_US")).precision(.fractionLength(2))))
+                    Text(item.mockPrice.formatted(.currency(code: "USD")))
                         .font(.system(size: 16, weight: .semibold))
 
                     HStack(spacing: 4) {
-                        Image(systemName: mockChangePct >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
+                        Image(systemName: item.mockChangePct >= 0 ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
                             .scaleEffect(x: 1.0, y: 0.5, anchor: .center)
-                        Text(String(format: "%.2f%%", abs(mockChangePct)))
+                        Text(String(format: "%.2f%%", abs(item.mockChangePct)))
                     }
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(mockChangePct >= 0 ? .green : .red)
+                    .foregroundColor(item.mockChangePct >= 0 ? .green : .red)
                 }
             }
             .padding(.vertical, 6)
             .padding(.leading, 1)
             .contentShape(Rectangle())
-            .onAppear {
-                if mockPrice == 0 {
-                    mockPrice = Double.random(in: 50...20_000)
-                    let sign: Double = Bool.random() ? 1 : -1
-                    mockChangePct = sign * Double.random(in: 0.1...20.0)
-                }
-            }
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(item.currency.name), Portfolio balance \(item.mockPrice.formatted(.currency(code: "USD")))")
+        .accessibilityValue(item.mockChangePct >= 0 ? "Up by \(String(format: "%.2f", item.mockChangePct)) percent" : "Down by \(String(format: "%.2f", abs(item.mockChangePct))) percent")
     }
 
     private var lineColor: Color {
-        mockChangePct >= 0 ? .green : .red
+        item.mockChangePct >= 0 ? .green : .red
     }
 }
 
